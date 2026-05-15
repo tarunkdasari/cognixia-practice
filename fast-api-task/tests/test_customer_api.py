@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from customers import (
-    CustomerRepository,
+    InMemoryCustomerRepository,
     CustomerService,
     create_customer_router,
     create_account_router,
@@ -10,7 +10,7 @@ from customers import (
 
 
 def create_test_client():
-    repo = CustomerRepository()
+    repo = InMemoryCustomerRepository()
     service = CustomerService(repo)
 
     app = FastAPI(title="Test Customers/Accounts API")

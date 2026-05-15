@@ -1,38 +1,12 @@
 from fastapi import FastAPI, APIRouter, HTTPException
-from pydantic import BaseModel
-from enum import Enum
+from models import Customer, Account, AccountType, CreateCustomerRequest, CreateAccountRequest
+from customer_repo import CustomerRepoMongoDB
 from typing import List
 
-# ─────────────────────────────────────────────
-# Models
-# ─────────────────────────────────────────────
-class AccountType(str, Enum):
-    SAVINGS = "Savings"
-    CHECKINGS = "Checkings"
-
-class Account(BaseModel):
-    id: int
-    type: AccountType
-    balance: float
-
-class Customer(BaseModel):
-    id: int
-    name: str
-    accounts: List[Account] = []
-
-class CreateCustomerRequest(BaseModel):
-    name: str
-
-
-class CreateAccountRequest(BaseModel):
-    type: AccountType
-    balance: float
-
-
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Repository  (in-memory data store)
-# ─────────────────────────────────────────────
-class CustomerRepository:
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class InMemoryCustomerRepository:
     def __init__(self):
         self.customer_id_counter = 4
         self.account_id_counter = 106
@@ -128,11 +102,11 @@ class CustomerRepository:
         return False
 
 
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Service  (Business Logic)
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class CustomerService:
-    def __init__(self, repo: CustomerRepository):
+    def __init__(self, repo: CustomerRepoMongoDB):
         self.repo = repo
 
     def get_all_customers(self):
@@ -196,9 +170,9 @@ class CustomerService:
         return {"message": f"Account {account_id} deleted successfully"}
 
 
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Controllers  (routers)
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def create_customer_router(service: CustomerService) -> APIRouter:
     router = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -249,10 +223,10 @@ def create_account_router(service: CustomerService) -> APIRouter:
 
     return router
 
-# ─────────────────────────────────────────────
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # App bootstrap
-# ─────────────────────────────────────────────
-repo = CustomerRepository()
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+repo = CustomerRepoMongoDB()
 service = CustomerService(repo)
 
 app = FastAPI(title="Customers/Accounts API")

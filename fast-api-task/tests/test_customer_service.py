@@ -5,11 +5,11 @@ from fastapi import HTTPException
 # Test Service layer methods in API
 # Test Controllers
 
-from customers import CustomerRepository, CustomerService, AccountType
+from customers import InMemoryCustomerRepository, CustomerService, AccountType
 
 @pytest.fixture
 def service():
-    repo = CustomerRepository()
+    repo = InMemoryCustomerRepository()
     return CustomerService(repo)
 
 # Example 1: test getting all customers
