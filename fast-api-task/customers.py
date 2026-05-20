@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from models import Customer, Account, AccountType, CreateCustomerRequest, CreateAccountRequest
 from customer_repo import CustomerRepoMongoDB
 from typing import List
@@ -207,7 +208,7 @@ def create_account_router(service: CustomerService) -> APIRouter:
     def get_all_accounts():
         return service.get_all_accounts()
     
-    @router.get("/preimum", response_model=List[Account])
+    @router.get("/premium", response_model=List[Account])
     def get_premium_account():
         return service.get_premium_account()
     
@@ -243,6 +244,17 @@ repo = LazyCustomerRepository()
 service = CustomerService(repo)
 
 app = FastAPI(title="Customers/Accounts API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get('/')
 def say_hello():
     return {"message": "hello!"}
