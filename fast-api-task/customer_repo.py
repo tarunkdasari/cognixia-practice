@@ -2,13 +2,18 @@ from pymongo import MongoClient, ReturnDocument
 from pymongo.errors import BulkWriteError, DuplicateKeyError
 from models import Customer, Account, AccountType, CreateCustomerRequest, CreateAccountRequest
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Repository  (MongoDB database store)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CustomerRepoMongoDB:
     def __init__(self):
-        self.client = MongoClient("mongodb://127.0.0.1:27017")
+        mongo_uri = os.getenv('MONGO_ATLAS_URI')
+        self.client = MongoClient(mongo_uri)
         self.db = self.client["bank_api_db"]
         self.customers_collection = self.db["customers"]
         self.counters_collection = self.db["counters"]
@@ -81,6 +86,9 @@ class CustomerRepoMongoDB:
             {"id": customer_id},
             {"_id": 0}
         )
+
+        if customer is None:
+            return None
 
         accounts = customer.get("accounts", [])
 

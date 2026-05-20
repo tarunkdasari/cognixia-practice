@@ -106,7 +106,7 @@ class InMemoryCustomerRepository:
 # Service  (Business Logic)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class CustomerService:
-    def __init__(self, repo: CustomerRepoMongoDB):
+    def __init__(self, repo):
         self.repo = repo
 
     def get_all_customers(self):
@@ -226,7 +226,20 @@ def create_account_router(service: CustomerService) -> APIRouter:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # App bootstrap
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-repo = CustomerRepoMongoDB()
+class LazyCustomerRepository:
+    def __init__(self):
+        self._repo = None
+
+    def _get_repo(self):
+        if self._repo is None:
+            self._repo = CustomerRepoMongoDB()
+        return self._repo
+
+    def __getattr__(self, name):
+        return getattr(self._get_repo(), name)
+
+
+repo = LazyCustomerRepository()
 service = CustomerService(repo)
 
 app = FastAPI(title="Customers/Accounts API")

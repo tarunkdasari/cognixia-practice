@@ -1,2 +1,7 @@
 __pycache__/
 *.py[cod]
+fast-api-task/aws_integration_instructions.txt
+fast-api-task/.env
+fullstack-bootcamp/
+hello-cicd/
+lambda-mongodb.zip
