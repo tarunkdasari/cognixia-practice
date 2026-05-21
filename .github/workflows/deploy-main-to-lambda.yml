@@ -1,0 +1,49 @@
+name: Deploy Bank API to Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: lambda-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Lambda deployment package
+        run: |
+          rm -rf package lambda_deploy.zip
+          mkdir package
+
+          python -m pip install --upgrade pip
+          pip install -r fast-api-task/requirements.txt -t package
+
+          cp fast-api-task/*.py package/
+
+          cd package
+          zip -r ../lambda_deploy.zip .
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy zip to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name student-tarun-krishna-dasari-bank-api-lambda \
+            --zip-file fileb://lambda_deploy.zip

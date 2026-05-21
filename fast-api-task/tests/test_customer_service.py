@@ -64,7 +64,23 @@ def test_get_all_accounts(service):
     assert accounts[0].id == 101
     assert accounts[0].type == AccountType.SAVINGS
 
-# Example 7: test premium accounts
+# Example 7: test getting accounts by customer ID
+def test_get_accounts_by_customer_id_success(service):
+    accounts = service.get_accounts_by_customer_id(1)
+
+    assert len(accounts) == 2
+    assert accounts[0].id == 101
+    assert accounts[1].id == 102
+
+# Example 8: test accounts by customer ID not found
+def test_get_accounts_by_customer_id_not_found(service):
+    with pytest.raises(HTTPException) as exc_info:
+        service.get_accounts_by_customer_id(999)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "ERROR: Customer 999 not found"
+
+# Example 9: test premium accounts
 def test_get_premium_accounts(service):
     premium_accounts = service.get_premium_account()
 
@@ -73,7 +89,7 @@ def test_get_premium_accounts(service):
     premium_ids = [account.id for account in premium_accounts]
     assert premium_ids == [101, 104, 105]
 
-# Example 8: test adding account to customer
+# Example 10: test adding account to customer
 def test_add_account_to_customer_success(service):
     updated_customer = service.add_account_to_customer(
         AccountType.SAVINGS,
@@ -89,7 +105,7 @@ def test_add_account_to_customer_success(service):
     assert new_account.type == AccountType.SAVINGS
     assert new_account.balance == 5000
 
-# Example 9: test negative balance
+# Example 11: test negative balance
 def test_add_account_negative_balance(service):
     with pytest.raises(HTTPException) as exc_info:
         service.add_account_to_customer(
@@ -101,7 +117,19 @@ def test_add_account_negative_balance(service):
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Account balance cannot be negative"
 
-# Example 10: test deleting customer
+# Example 12: test adding account to missing customer
+def test_add_account_customer_not_found(service):
+    with pytest.raises(HTTPException) as exc_info:
+        service.add_account_to_customer(
+            AccountType.SAVINGS,
+            5000,
+            999
+        )
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Customer 999 not found"
+
+# Example 13: test deleting customer
 def test_delete_customer_success(service):
     result = service.delete_customer(1)
 
@@ -109,3 +137,31 @@ def test_delete_customer_success(service):
 
     customers = service.get_all_customers()
     assert len(customers) == 2
+
+# Example 14: test deleting missing customer
+def test_delete_customer_not_found(service):
+    with pytest.raises(HTTPException) as exc_info:
+        service.delete_customer(999)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Customer 999 not found"
+
+# Example 15: test deleting account
+def test_delete_account_success(service):
+    result = service.delete_account(101)
+
+    assert result == {"message": "Account 101 deleted successfully"}
+
+    accounts = service.get_all_accounts()
+    account_ids = [account.id for account in accounts]
+
+    assert len(accounts) == 4
+    assert 101 not in account_ids
+
+# Example 16: test deleting missing account
+def test_delete_account_not_found(service):
+    with pytest.raises(HTTPException) as exc_info:
+        service.delete_account(999)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Account 999 not found"

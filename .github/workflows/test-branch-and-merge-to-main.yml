@@ -1,0 +1,60 @@
+name: Test Day-* Branch and Merge to Main Branch
+
+on:
+  push:
+    branches:
+      - "day-*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-to-main
+  cancel-in-progress: false
+
+jobs:
+  test-and-promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout day branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: fast-api-task
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+
+      - name: Run tests
+        working-directory: fast-api-task
+        env:
+          PYTHONPATH: ${{ github.workspace }}/fast-api-task
+        run: |
+          python -c "import customers; print(customers.__file__)"
+          pytest tests
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Promote tested branch to main
+        run: |
+          CURRENT_BRANCH="${GITHUB_REF_NAME}"
+
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+          git merge --no-ff "origin/$CURRENT_BRANCH" -m "Promote $CURRENT_BRANCH to main after passing tests"
+
+          git push origin main
