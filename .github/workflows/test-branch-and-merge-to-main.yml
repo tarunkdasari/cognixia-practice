@@ -34,8 +34,9 @@ jobs:
           pip install pytest httpx
 
       - name: Run tests
+        working-directory: fast-api-task
         run: |
-          pytest fast-api-task/tests
+          pytest tests
 
       - name: Configure Git
         run: |
