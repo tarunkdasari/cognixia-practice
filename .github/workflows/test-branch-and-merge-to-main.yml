@@ -36,7 +36,10 @@ jobs:
 
       - name: Run tests
         working-directory: fast-api-task
+        env:
+          PYTHONPATH: ${{ github.workspace }}/fast-api-task
         run: |
+          python -c "import customers; print(customers.__file__)"
           pytest tests
 
       - name: Configure Git
