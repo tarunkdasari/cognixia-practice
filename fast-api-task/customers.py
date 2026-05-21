@@ -243,7 +243,7 @@ class LazyCustomerRepository:
 repo = LazyCustomerRepository()
 service = CustomerService(repo)
 
-app = FastAPI(title="Customers/Accounts API")
+app = FastAPI(title="Customers/Accounts Bank API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

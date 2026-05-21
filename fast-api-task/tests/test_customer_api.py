@@ -113,11 +113,10 @@ def test_get_all_accounts():
 
 
 # Tests that premium accounts with balance greater than 10000 are returned
-# NOTE: Your current route is spelled "/preimum" in customers.py
 def test_get_premium_accounts():
     client = create_test_client()
 
-    response = client.get("/accounts/preimum")
+    response = client.get("/accounts/premium")
 
     assert response.status_code == 200
 

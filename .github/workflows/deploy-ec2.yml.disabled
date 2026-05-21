@@ -1,9 +1,9 @@
 name: Deploy Bank API to EC2
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
 concurrency:
   group: ec2-deploy

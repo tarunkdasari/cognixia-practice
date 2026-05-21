@@ -5,3 +5,9 @@ fast-api-task/.env
 fullstack-bootcamp/
 hello-cicd/
 lambda-mongodb.zip
+lambda_deploy.zip
+package/
+fast-api-task/terraform/.terraform/
+fast-api-task/terraform/.terraform.lock.hcl
+fast-api-task/terraform/terraform.tfstate*
+fast-api-task/terraform/ssh-keys/
